@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewData["Title"] = "User Details";
+}
+
+
+<div>
+    <button id="btnNext">Next</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>S.N.</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Contact</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="bodyUsers"></tbody>
+    </table>
+</div>
+<script>
+    $(function () {
+        getUsers();
+    });
+    $('#btnNext').click(navigate);
+    function navigate() {       
+        window.location.href = '/Users/UserPage';
+    }
+    function getUsers() {        
+        $.ajax({            
+            url: '/Users/GetUserLists',
+            async: false,
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (res) {
+                var html = '', sn = 1;
+                $.each(res, function (i, val) {
+                    html += '<tr>'
+                    html += '<td>' + (sn) + '</td>';
+                    html += '<td>' + val.userName + '</td>';
+                    html += '<td>' + val.email + '</td>';
+                    html += '<td>' + val.mobile + '</td>';
+                    html += '<td>' + val.flag + '</td>';
+                    html += '</tr>';
+                    sn++;
+                });
+                $('#bodyUsers').html(html);
+            },
+            error: function () {
+                alert('No record found');
+            }
+        });
+    }
+
+</script>

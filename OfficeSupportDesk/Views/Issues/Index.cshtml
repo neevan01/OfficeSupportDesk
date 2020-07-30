@@ -1,0 +1,230 @@
+﻿@model DomainModel.Issue
+
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/css/select2.css" rel="stylesheet" />
+<script src="https://smtpjs.com/v3/smtp.js">
+</script>
+<form asp-action="Index">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Category" class="control-label"></label>
+                <select id="Category" name="Category" class="form-control">
+                </select>
+                <select id="SCategory" class="form-control">
+                    <option value="Khata">Khata</option>
+                    <option value="Mediflow">Mediflow</option>
+                </select>
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="SubCategory" class="control-label"></label>
+                <select id="SubCategory" name="SubCategory" class="form-control">
+                </select>
+                <span asp-validation-for="SubCategory" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="State" class="control-label"></label>
+                <select id="State" name="State" class="form-control">
+                    <option value="New">New</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Canceled">Canceled</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <span asp-validation-for="State" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Impact" class="control-label"></label>
+                <select id="Impact" name="Impact" class="form-control">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+                <span asp-validation-for="Impact" class="text-danger"></span>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Urgency" class="control-label"></label>
+                <select id="Urgency" name="Urgency" class="form-control">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+                <span asp-validation-for="Urgency" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Priority" class="control-label"></label>
+                <select id="Priority" name="Priority" class="form-control">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+                <span asp-validation-for="Priority" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="AssignedTo" class="control-label"></label>
+                <select id="AssignedTo" name="AssignedTo" class="form-control">
+                </select>
+
+                <span asp-validation-for="AssignedTo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" id="btnSubmit" value="Create" class="btn btn-primary" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Issues" class="control-label">Note</label>
+                <textarea style="width:100%" id="iss"placeholder="Enter Client's Problem, AnyDesk Number, Client's Details" name="Issues" required rows="10"></textarea>                
+                <span asp-validation-for="Issues" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function () {
+        fillSubCategory();
+        fillCategory();
+        fillAssignee();
+        $('#SCategory').hide();
+        $('#Category').select2();
+        $('#SubCategory').select2();
+        $('#AssignedTo').select2();
+    });
+   
+    function fillCategory() {       
+        $.ajax({
+            url: '/Issues/GetCategory',
+            async: false,
+            type: 'post',
+            dataType: 'JSON',
+            success: function (res) {
+                $.each(res, function (key, val) {
+                    var option = new Option(val.category, val.category);
+                    $('#Category').append($(option));
+                });
+            },
+            error: function () {
+                alert('No result');
+            }
+        });
+    }
+
+    function fillAssignee() {        
+        $.ajax({
+            url: '/Issues/GetAssignee',
+            async: false,
+            type: 'post',
+            dataType: 'JSON',
+            success: function (res) {
+                $.each(res, function (key, val) {
+                    var option = new Option(val.userName, val.userName);
+                    $('#AssignedTo').append($(option));
+                });
+            },
+            error: function () {
+                alert('No result');
+            }
+        });
+    }
+
+    function fillSubCategory() {
+        $.ajax({
+            url: '/Issues/GetSubCategory',
+            async: false,
+            type: 'post',
+            dataType: 'JSON',
+            success: function (res) {
+                $.each(res, function (key, val) {
+                    var option = new Option(val.subCategory, val.subCategory);
+                    $('#SubCategory').append($(option));
+                });
+            },
+            error: function () {
+                alert('No result');
+            }
+        });
+    }
+
+    $('#Category').on("change", function () {
+        var sel = $(this).children("option:selected").val();
+        if (sel === 'Project') {
+            $('#SCategory').show();
+        } else {
+            $('#SCategory').hide();
+        }
+    });
+
+    $('#btnSubmit').click(sendEmail);
+    
+    function sendEmail() {  
+        var cat = $('#Category').children("option:selected").val();
+        var scat = $('#SubCategory').children("option:selected").val();
+        var state = $('#State').children("option:selected").val();
+        var impact = $('#Impact').children("option:selected").val();
+        var urgency = $('#Urgency').children("option:selected").val();
+        var priority = $('#Priority').children("option:selected").val();
+       // var assignee = $('#AssignedTo').children("option:selected").val();
+        var bdy = $('#iss').val();
+        var issues = {
+            Category: cat,
+            SubCategory: scat,
+            State: state,
+            Impact: impact,
+            Urgency: urgency,
+            Priority: priority           
+        };
+        var issue = 'Category: ' + cat;
+        issue += '<br/>SubCategory: ' + scat;
+        issue += '<br/>State: ' + state;
+        issue += '<br/>Impact: ' + impact;
+        issue += '<br/>Urgency: ' + urgency;
+        issue += '<br/>Priority: ' + priority;       
+        if (bdy != '') {
+            issue += '<br />Note: ' + bdy;
+            //issues.body = bdy;
+            Email.send({
+                SecureToken: "9c79bd12-3853-49dd-be6f-ab022d958086",
+                To: 'neevanaveen1997@gmail.com',
+                From: "abchrmsystem019@gmail.com",
+                Subject: "Issues created!!!",
+                Body: issue,
+            }).then(alert("User Notified")
+            );
+        } else {
+            alert('No problem to send');
+        }
+    }
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

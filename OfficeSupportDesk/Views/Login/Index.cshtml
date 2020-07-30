@@ -1,0 +1,74 @@
+﻿
+@{
+    Layout = null;
+}
+
+
+<html>
+<head>
+    <link href="~/css/login.css" rel="stylesheet" />
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-5 col-md-3">
+                <div class="form-login">
+                    <h4>User Login</h4>
+                    <input type="text" id="userName" class="form-control input-sm chat-input" placeholder="username" />
+                    <br />
+                    <input type="password" id="password" class="form-control input-sm chat-input" placeholder="password" />
+                    <br />
+                    <div class="wrapper">
+                        <span class="group-btn">
+                            <button type="button" id="btnLogin" class="btn btn-primary float-left" value="Login" >LogIn</button>
+                            <button type="reset" id="btnReset" class="btn btn-danger float-right">Reset</button>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        function reset() {
+            $('#userName').val('');
+            $('#password').val('');
+        }
+        $('#btnReset').click( reset);
+
+        $('#btnLogin').click(function () {
+            var uname = $('#userName').val().trim();
+            var pw = $('#password').val().trim();
+            if (uname !== '' && pw !== '') {
+                $.ajax({
+                    url: '/Login/LoginUser',
+                    data: {
+                        uname: uname,
+                        pw: pw
+                    },
+                    async: false,
+                    type: 'post',
+                    success: function (data) {
+                        if (data === '1') {                              
+                            window.location.href = '/';
+                        }
+                        else {
+                            alert('Invalid Username or Password!');
+                            reset();
+                        }
+                    },
+                    error: function (data) {
+                        alert('Error : ' + data.statusText);
+                    }
+                });
+            }
+            else {
+                alert('Enter the correct username and password');
+            }
+        });
+    </script>
+</body>
+</html>
+
